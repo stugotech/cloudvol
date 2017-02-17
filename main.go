@@ -19,8 +19,8 @@ func main() {
 	log.WithFields(log.Fields{"pid": os.Getpid()}).Info("*** STARTED cloudvol volume driver ***")
 
 	mode := flag.String("mode", "fs", "storage mode (fs, gce, aws)")
-	port := flag.Int("port", 0, "port to listen on")
-	sock := flag.String("sock", "cloudvol", "a unix socket to listen on (ignored if -port is specified)")
+	port := flag.Int("port", 8080, "port to listen on (ignored if sock is set)")
+	sock := flag.Bool("sock", false, "listen on a unix socket")
 	flag.Parse()
 
 	log.WithFields(log.Fields{"mode": *mode}).Info("creating storage driver")
@@ -35,13 +35,13 @@ func main() {
 	plugin := plugin.NewCloudvolPlugin(d)
 	handler := volume.NewHandler(plugin)
 
-	if *port > 0 {
+	if !*sock {
 		log.WithFields(log.Fields{"port": *port}).Infof("listening on port %d", *port)
 		addr := fmt.Sprintf(":%d", *port)
 		err = handler.ServeTCP(driverName, addr, nil)
 	} else {
-		log.WithFields(log.Fields{"socket": *sock}).Infof("listening on socket file")
-		err = handler.ServeUnix("root", *sock)
+		log.Infof("listening on socket file")
+		err = handler.ServeUnix(driverName, 0)
 	}
 
 	if err != nil {
