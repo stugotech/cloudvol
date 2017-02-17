@@ -1,11 +1,9 @@
 package main
 
 import (
-	"os"
-
 	"flag"
-
 	"fmt"
+	"os"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/docker/go-plugins-helpers/volume"
@@ -20,17 +18,19 @@ const (
 func main() {
 	log.WithFields(log.Fields{"pid": os.Getpid()}).Info("*** STARTED cloudvol volume driver ***")
 
-	port := flag.Int("port", 0, "the port to listen on")
+	mode := flag.String("mode", "fs", "storage mode (fs, gce, aws)")
+	port := flag.Int("port", 0, "port to listen on")
 	sock := flag.String("sock", "/var/run/cloudvol.sock", "a unix socket to listen on (ignored if -port is specified)")
 	flag.Parse()
 
-	driver, err := driver.NewGceDriver()
+	storage, err := createStorageDriver(*mode)
 
 	if err != nil {
 		log.WithError(err).Fatal("stopping due to last error")
 	}
 
-	plugin := plugin.NewCloudvolPlugin("/tmp", driver)
+	d := driver.NewDriver(storage, "/mnt")
+	plugin := plugin.NewCloudvolPlugin(d)
 	handler := volume.NewHandler(plugin)
 
 	if *port > 0 {
@@ -46,5 +46,21 @@ func main() {
 		log.Fatal(err)
 	} else {
 		log.Info("Started.")
+	}
+}
+
+func createStorageDriver(name string) (driver.StorageDriver, error) {
+	if name == "gce" {
+		block, err := driver.NewGceDriver()
+
+		if err != nil {
+			return nil, err
+		}
+
+		return driver.NewBlockDriverStorage(block), nil
+	} else if name == "fs" {
+		return driver.NewFsStorage()
+	} else {
+		return nil, fmt.Errorf("unknown driver type '%s'", name)
 	}
 }

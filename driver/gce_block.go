@@ -26,7 +26,7 @@ type gceDriver struct {
 }
 
 // NewGceDriver creates a new instance of the GCE volume driver
-func NewGceDriver() (Driver, error) {
+func NewGceDriver() (BlockDriver, error) {
 	if !metadata.OnGCE() {
 		log.Warn("not running on GCE")
 		return nil, fmt.Errorf("not running on GCE")
