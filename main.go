@@ -20,8 +20,10 @@ func main() {
 
 	mode := flag.String("mode", "fs", "storage mode (fs, gce, aws)")
 	port := flag.Int("port", 0, "port to listen on")
-	sock := flag.String("sock", "/var/run/cloudvol.sock", "a unix socket to listen on (ignored if -port is specified)")
+	sock := flag.String("sock", "cloudvol", "a unix socket to listen on (ignored if -port is specified)")
 	flag.Parse()
+
+	log.WithFields(log.Fields{"mode": *mode}).Info("creating storage driver")
 
 	storage, err := createStorageDriver(*mode)
 
