@@ -7,7 +7,6 @@ import (
 	"os"
 )
 
-// osFileSystem uses afero to perform fs operations
 type osFileSystem struct {
 }
 
