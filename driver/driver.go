@@ -41,6 +41,7 @@ func NewDriver(storage StorageDriver, mountPath string) Driver {
 	return &driverInfo{
 		storage:   storage,
 		mountPath: mountPath,
+		volumes:   make(map[string]*Volume),
 	}
 }
 
