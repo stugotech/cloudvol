@@ -17,7 +17,7 @@ func (v *Volume) CheckMounted() error {
 	if v.MountPath == "" {
 		log.WithFields(log.Fields{
 			"name": v.Name,
-		}).Error("not mounted")
+		}).Warn("CheckMount: not mounted")
 
 		return fmt.Errorf("volume '%s' not mounted", v.Name)
 	}
@@ -30,7 +30,7 @@ func (v *Volume) CheckUnmounted() error {
 		log.WithFields(log.Fields{
 			"name":      v.Name,
 			"mountPath": v.MountPath,
-		}).Error("already mounted")
+		}).Warn("CheckUnmounted: already mounted")
 
 		return fmt.Errorf("volume '%s' already mounted on '%s'", v.Name, v.MountPath)
 	}

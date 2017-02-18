@@ -1,9 +1,5 @@
 package driver
 
-import (
-	log "github.com/Sirupsen/logrus"
-)
-
 type fsStorage struct {
 }
 
@@ -14,16 +10,10 @@ func NewFsStorage() (StorageDriver, error) {
 
 // Mount mounts a volume from the filesystem
 func (d *fsStorage) Mount(volume *Volume) error {
-	log.WithFields(log.Fields{"name": volume.Name}).Info("mount volume")
 	return nil
 }
 
 // Unmount unmounts a volume on the filesystem
 func (d *fsStorage) Unmount(volume *Volume) error {
-	log.WithFields(log.Fields{
-		"name":      volume.Name,
-		"mountPath": volume.MountPath,
-	}).Info("unmount volume")
-
 	return nil
 }

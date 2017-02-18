@@ -37,7 +37,6 @@ type driverInfo struct {
 
 // NewDriver creates a new driver
 func NewDriver(storage StorageDriver, mountPath string) Driver {
-	log.WithFields(log.Fields{"mountPath": mountPath}).Info("creating new driver")
 	return &driverInfo{
 		storage:   storage,
 		mountPath: mountPath,
@@ -47,10 +46,7 @@ func NewDriver(storage StorageDriver, mountPath string) Driver {
 
 // Create creates a volume
 func (d *driverInfo) Create(name string, options map[string]string) (*Volume, error) {
-	log.WithFields(log.Fields{"name": name, "options": options}).Info("create volume")
-
 	if _, exists := d.volumes[name]; exists {
-		log.WithFields(log.Fields{"name": name}).Error("volume name already exists")
 		return nil, fmt.Errorf("volume name '%s' already exists", name)
 	}
 
@@ -62,11 +58,8 @@ func (d *driverInfo) Create(name string, options map[string]string) (*Volume, er
 
 // Remove removes a volume
 func (d *driverInfo) Remove(name string) error {
-	log.WithFields(log.Fields{"name": name}).Info("remove volume")
-
 	vol, exists := d.volumes[name]
 	if !exists {
-		log.WithFields(log.Fields{"name": name}).Error("volume not found")
 		return fmt.Errorf("volume '%s' not found", name)
 	}
 
@@ -83,11 +76,8 @@ func (d *driverInfo) Remove(name string) error {
 
 // Get gets the details of a volume
 func (d *driverInfo) Get(name string) (*Volume, error) {
-	log.WithFields(log.Fields{"name": name}).Info("get volume")
-
 	vol, exists := d.volumes[name]
 	if !exists {
-		log.WithFields(log.Fields{"name": name}).Error("volume not found")
 		return nil, fmt.Errorf("volume '%s' not found", name)
 	}
 
@@ -96,8 +86,6 @@ func (d *driverInfo) Get(name string) (*Volume, error) {
 
 // List gets all volumes
 func (d *driverInfo) List() ([]*Volume, error) {
-	log.Info("list volumes")
-
 	var volumes []*Volume
 
 	for _, vol := range d.volumes {
@@ -109,8 +97,6 @@ func (d *driverInfo) List() ([]*Volume, error) {
 
 // Mount mounts a volume
 func (d *driverInfo) Mount(volume *Volume) error {
-	log.WithFields(log.Fields{"name": volume.Name}).Info("mount volume")
-
 	// don't mount twice
 	if err := volume.CheckUnmounted(); err != nil {
 		return err
@@ -120,28 +106,11 @@ func (d *driverInfo) Mount(volume *Volume) error {
 	exists, err := fs.DirExists(volume.MountPath)
 
 	if err != nil {
-		log.WithFields(log.Fields{
-			"name":      volume.Name,
-			"mountPath": volume.MountPath,
-			"error":     err,
-		}).Error("error accessing mount path")
-
 		return fmt.Errorf("error accessing mount path '%s': %v", volume.MountPath, err)
 	}
 
 	if !exists {
-		log.WithFields(log.Fields{
-			"name":      volume.Name,
-			"mountPath": volume.MountPath,
-		}).Info("creating mount path")
-
 		if err := fs.CreateDir(volume.MountPath, true, 0700); err != nil {
-			log.WithFields(log.Fields{
-				"name":      volume.Name,
-				"mountPath": volume.MountPath,
-				"error":     err,
-			}).Error("error creating mount path")
-
 			return fmt.Errorf("error creating mount path '%s': %v", volume.MountPath, err)
 		}
 	}
@@ -156,11 +125,6 @@ func (d *driverInfo) Mount(volume *Volume) error {
 
 // Mount mounts a volume
 func (d *driverInfo) Unmount(volume *Volume) error {
-	log.WithFields(log.Fields{
-		"name":      volume.Name,
-		"mountPath": volume.MountPath,
-	}).Info("unmount volume")
-
 	if err := volume.CheckMounted(); err != nil {
 		return err
 	}
